@@ -1,0 +1,101 @@
+[SPARSE] Backend: spconv, Attention: xformers
+============================================================
+  Architecture 2: Delta Training (FINAL)
+============================================================
+
+[1/4] Loading TRELLIS 1 and cached latents...
+[SPARSE][CONV] spconv algo: native
+[ATTENTION] Using backend: xformers
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:211: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_fwd")
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:344: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_bwd")
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:51: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  _TORCH_CUSTOM_FWD = amp.custom_fwd(cast_inputs=torch.float16)
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:100: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:166: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:335: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:372: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:392: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:415: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+Using cache found in /root/.cache/torch/hub/facebookresearch_dinov2_main
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+  Using 5 cached latents (max 5)
+    T.png OK feats=(13966, 8) coords=(13966, 4)
+    typical_building_building.png OK feats=(23303, 8) coords=(23303, 4)
+    typical_building_castle.png OK feats=(13214, 8) coords=(13214, 4)
+    typical_building_colorful_cottage.png OK feats=(21243, 8) coords=(21243, 4)
+    typical_building_maya_pyramid.png OK feats=(17679, 8) coords=(17679, 4)
+
+[2/4] Freeing DiT models (only need decoders)...
+  Freed ~20GB VRAM.
+
+[3/4] Loading CLIP...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/usr/local/lib/python3.11/dist-packages/open_clip/factory.py:450: UserWarning: QuickGELU mismatch between final model config (quick_gelu=False) and pretrained tag 'openai' (quick_gelu=True).
+  warnings.warn(
+  Done.
+  EditNet: 4,341,256 params
+
+[4/4] Training...
+  Loaded 10 training pairs from /workspace/edit_training_data/training_pairs.json
+  Differentiable rendering: ON
+============================================================
+  E1 S3/15 | loss=-0.2261 sim=0.226 d=0.01108 GRAD | make it glowing
+  E1 S6/15 | loss=-0.2364 sim=0.236 d=0.02436 GRAD | make it marble
+  E1 S9/15 | loss=-0.2160 sim=0.216 d=0.02625 GRAD | make it blue
+  E1 S12/15 | loss=-0.2085 sim=0.209 d=0.02873 GRAD | paint it purple
+  E1 S15/15 | loss=-0.2316 sim=0.232 d=0.03266 GRAD | make it black
+
+  Epoch 1 | 13s | loss=-0.2196 sim=0.220 preserve=0.0008 prompt=-0.2196 delta=0.000159 d_max=0.02178 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_1.pt
+  E2 S3/15 | loss=-0.2033 sim=0.203 d=0.03808 GRAD | paint it orange
+  E2 S6/15 | loss=-0.2173 sim=0.217 d=0.04882 GRAD | make it futuristic
+  E2 S9/15 | loss=-0.2162 sim=0.216 d=0.04855 GRAD | make it blue
+  E2 S12/15 | loss=-0.2339 sim=0.234 d=0.05566 GRAD | make it rusty
+  E2 S15/15 | loss=-0.2368 sim=0.237 d=0.06193 GRAD | make it marble
+
+  Epoch 2 | 13s | loss=-0.2199 sim=0.220 preserve=0.0018 prompt=-0.2200 delta=0.000445 d_max=0.04939 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_2.pt
+  E3 S3/15 | loss=-0.2265 sim=0.227 d=0.06440 GRAD | make it glowing
+  E3 S6/15 | loss=-0.2320 sim=0.232 d=0.06833 GRAD | make it black
+  E3 S9/15 | loss=-0.2089 sim=0.209 d=0.07150 GRAD | paint it purple
+  E3 S12/15 | loss=-0.2177 sim=0.218 d=0.07383 GRAD | make it futuristic
+  E3 S15/15 | loss=-0.1977 sim=0.198 d=0.07186 GRAD | make it matte black
+
+  Epoch 3 | 13s | loss=-0.2202 sim=0.220 preserve=0.0031 prompt=-0.2204 delta=0.001096 d_max=0.06941 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_3.pt
+  E4 S3/15 | loss=-0.2182 sim=0.219 d=0.07654 GRAD | make it futuristic
+  E4 S6/15 | loss=-0.2037 sim=0.204 d=0.07994 GRAD | paint it orange
+  E4 S9/15 | loss=-0.2323 sim=0.233 d=0.08435 GRAD | make it black
+  E4 S12/15 | loss=-0.2281 sim=0.228 d=0.08662 GRAD | make it worn and aged
+  E4 S15/15 | loss=-0.2162 sim=0.216 d=0.08912 GRAD | make it blue
+
+  Epoch 4 | 15s | loss=-0.2203 sim=0.221 preserve=0.0042 prompt=-0.2206 delta=0.001723 d_max=0.08182 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_4.pt
+  E5 S3/15 | loss=-0.2036 sim=0.204 d=0.09010 GRAD | paint it orange
+  E5 S6/15 | loss=-0.2181 sim=0.219 d=0.08911 GRAD | make it futuristic
+  E5 S9/15 | loss=-0.2267 sim=0.227 d=0.09024 GRAD | make it glowing
+  E5 S12/15 | loss=-0.2340 sim=0.234 d=0.09108 GRAD | make it rusty
+  E5 S15/15 | loss=-0.2386 sim=0.239 d=0.08943 GRAD | make it stone
+
+  Epoch 5 | 13s | loss=-0.2205 sim=0.221 preserve=0.0049 prompt=-0.2209 delta=0.002694 d_max=0.09012 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_5.pt
+
+============================================================
+  Training complete!
+============================================================

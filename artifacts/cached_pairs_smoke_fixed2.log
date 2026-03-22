@@ -1,0 +1,65 @@
+[SPARSE] Backend: spconv, Attention: xformers
+============================================================
+  Architecture 2: Delta Training (FINAL)
+============================================================
+
+[1/4] Loading TRELLIS 1 and cached latents...
+[SPARSE][CONV] spconv algo: native
+[ATTENTION] Using backend: xformers
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:211: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_fwd")
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:344: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_bwd")
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:51: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  _TORCH_CUSTOM_FWD = amp.custom_fwd(cast_inputs=torch.float16)
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:100: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:166: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:335: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:372: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:392: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:415: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+Using cache found in /root/.cache/torch/hub/facebookresearch_dinov2_main
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+  Using 3 cached latents (max 3)
+    T.png OK feats=(13966, 8) coords=(13966, 4)
+    typical_building_building.png OK feats=(23303, 8) coords=(23303, 4)
+    typical_building_castle.png OK feats=(13214, 8) coords=(13214, 4)
+
+[2/4] Freeing DiT models (only need decoders)...
+  Freed ~20GB VRAM.
+
+[3/4] Loading CLIP...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/usr/local/lib/python3.11/dist-packages/open_clip/factory.py:450: UserWarning: QuickGELU mismatch between final model config (quick_gelu=False) and pretrained tag 'openai' (quick_gelu=True).
+  warnings.warn(
+  Done.
+  EditNet: 4,341,256 params
+
+[4/4] Training...
+  Loaded 6 training pairs from /workspace/edit_training_data/training_pairs.json
+  Differentiable rendering: ON
+============================================================
+  E1 S3/9 | loss=-0.2331 sim=0.233 d=0.00986 GRAD | make it rusty
+  E1 S6/9 | loss=-0.2275 sim=0.228 d=0.01538 GRAD | make it worn and aged
+  E1 S9/9 | loss=-0.2032 sim=0.203 d=0.02249 GRAD | paint it orange
+
+  Epoch 1 | 8s | loss=-0.2186 sim=0.219 preserve=0.0004 prompt=-0.2187 delta=0.000025 d_max=0.01249 | 9/9 ok, 9/9 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_1.pt
+
+============================================================
+  Training complete!
+============================================================

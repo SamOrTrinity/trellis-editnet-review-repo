@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# large caches / models
+hf_models/
+.cache/
+miniconda/
+
+# raw training caches
+edit_training_data/encoded_latents/
+edit_training_data/*.pt
+
+# temporary outputs
+*.tmp
+*.swp

@@ -1,0 +1,48 @@
+[SPARSE] Backend: spconv, Attention: xformers
+Loading TRELLIS pipeline...
+[SPARSE][CONV] spconv algo: native
+[ATTENTION] Using backend: xformers
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:211: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_fwd")
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:344: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_bwd")
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:51: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  _TORCH_CUSTOM_FWD = amp.custom_fwd(cast_inputs=torch.float16)
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:100: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:166: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:335: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:372: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:392: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:415: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+Using cache found in /root/.cache/torch/hub/facebookresearch_dinov2_main
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+Loading CLIP...
+/usr/local/lib/python3.11/dist-packages/open_clip/factory.py:450: UserWarning: QuickGELU mismatch between final model config (quick_gelu=False) and pretrained tag 'openai' (quick_gelu=True).
+  warnings.warn(
+Loading checkpoint...
+Loading cached latent: /workspace/edit_training_data/encoded_latents/T.pt
+Saved: /workspace/edit_eval/original.png
+Prompt: make it red
+  delta_max: 0.072031
+  saved: /workspace/edit_eval/compare_make_it_red.png
+Prompt: make it wooden
+  delta_max: 0.072031
+  saved: /workspace/edit_eval/compare_make_it_wooden.png
+Prompt: make it glass
+  delta_max: 0.072031
+  saved: /workspace/edit_eval/compare_make_it_glass.png
+
+Done.

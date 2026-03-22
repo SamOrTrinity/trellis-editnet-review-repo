@@ -1,0 +1,62 @@
+[SPARSE] Backend: spconv, Attention: xformers
+============================================================
+  Architecture 2: Delta Training (FINAL)
+============================================================
+
+[1/4] Loading TRELLIS 1 and cached latents...
+[SPARSE][CONV] spconv algo: native
+[ATTENTION] Using backend: xformers
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:211: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_fwd")
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:344: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_bwd")
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:51: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  _TORCH_CUSTOM_FWD = amp.custom_fwd(cast_inputs=torch.float16)
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:100: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:166: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:335: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:372: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:392: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:415: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+Using cache found in /root/.cache/torch/hub/facebookresearch_dinov2_main
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+  Using 3 cached latents (max 3)
+    T.png OK feats=(13966, 8) coords=(13966, 4)
+    typical_building_building.png OK feats=(23303, 8) coords=(23303, 4)
+    typical_building_castle.png OK feats=(13214, 8) coords=(13214, 4)
+
+[2/4] Freeing DiT models (only need decoders)...
+  Freed ~20GB VRAM.
+
+[3/4] Loading CLIP...
+/usr/local/lib/python3.11/dist-packages/open_clip/factory.py:450: UserWarning: QuickGELU mismatch between final model config (quick_gelu=False) and pretrained tag 'openai' (quick_gelu=True).
+  warnings.warn(
+  Done.
+  EditNet: 4,341,256 params
+
+[4/4] Training...
+  3 objects x 2 prompts = 6 steps/epoch
+  Differentiable rendering: ON
+============================================================
+  E1 S3/6 | loss=-0.2272 sim=0.227 d=0.00969 GRAD | make it brown
+  E1 S6/6 | loss=-0.2121 sim=0.212 d=0.01797 GRAD | make it watercolor style
+
+  Epoch 1 | 5s | loss=-0.2228 sim=0.223 preserve=0.0003 prompt=-0.2228 delta=0.000035 d_max=0.01019 | 6/6 ok, 6/6 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_1.pt
+
+============================================================
+  Training complete!
+============================================================

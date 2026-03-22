@@ -1,0 +1,83 @@
+[SPARSE] Backend: spconv, Attention: xformers
+============================================================
+  Architecture 2: Delta Training (FINAL)
+============================================================
+
+[1/4] Loading TRELLIS 1 and cached latents...
+[SPARSE][CONV] spconv algo: native
+[ATTENTION] Using backend: xformers
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:211: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_fwd")
+/usr/local/lib/python3.11/dist-packages/xformers/ops/fmha/flash.py:344: FutureWarning: `torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.
+  @torch.library.impl_abstract("xformers_flash::flash_bwd")
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:51: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  _TORCH_CUSTOM_FWD = amp.custom_fwd(cast_inputs=torch.float16)
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:100: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:166: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:335: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:372: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:392: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+/usr/local/lib/python3.11/dist-packages/spconv/pytorch/functional.py:415: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @_TORCH_CUSTOM_BWD
+Using cache found in /root/.cache/torch/hub/facebookresearch_dinov2_main
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:43: UserWarning: xFormers is available (SwiGLU)
+  warnings.warn("xFormers is available (SwiGLU)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:27: UserWarning: xFormers is available (Attention)
+  warnings.warn("xFormers is available (Attention)")
+/root/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:33: UserWarning: xFormers is available (Block)
+  warnings.warn("xFormers is available (Block)")
+  Using 5 cached latents (max 5)
+    T.png OK feats=(13966, 8) coords=(13966, 4)
+    typical_building_building.png OK feats=(23303, 8) coords=(23303, 4)
+    typical_building_castle.png OK feats=(13214, 8) coords=(13214, 4)
+    typical_building_colorful_cottage.png OK feats=(21243, 8) coords=(21243, 4)
+    typical_building_maya_pyramid.png OK feats=(17679, 8) coords=(17679, 4)
+
+[2/4] Freeing DiT models (only need decoders)...
+  Freed ~20GB VRAM.
+
+[3/4] Loading CLIP...
+/usr/local/lib/python3.11/dist-packages/open_clip/factory.py:450: UserWarning: QuickGELU mismatch between final model config (quick_gelu=False) and pretrained tag 'openai' (quick_gelu=True).
+  warnings.warn(
+  Done.
+  EditNet: 4,341,256 params
+
+[4/4] Training...
+  Loaded 10 training pairs from /workspace/edit_training_data/training_pairs.json
+  Differentiable rendering: ON
+============================================================
+  E1 S3/15 | loss=-0.2148 sim=0.215 d=0.00889 GRAD | make it blue
+  E1 S6/15 | loss=-0.2085 sim=0.209 d=0.01743 GRAD | paint it purple
+  E1 S9/15 | loss=-0.2371 sim=0.237 d=0.02724 GRAD | make it stone
+  E1 S12/15 | loss=-0.2365 sim=0.237 d=0.03010 GRAD | make it marble
+  E1 S15/15 | loss=-0.2316 sim=0.232 d=0.03323 GRAD | make it black
+
+  Epoch 1 | 13s | loss=-0.2196 sim=0.220 preserve=0.0007 prompt=-0.2196 delta=0.000098 d_max=0.02134 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_1.pt
+  E2 S3/15 | loss=-0.2086 sim=0.209 d=0.04016 GRAD | paint it purple
+  E2 S6/15 | loss=-0.2143 sim=0.214 d=0.03991 GRAD | make it silver
+  E2 S9/15 | loss=-0.2185 sim=0.219 d=0.05097 GRAD | make it green
+  E2 S12/15 | loss=-0.2033 sim=0.203 d=0.05501 GRAD | paint it orange
+  E2 S15/15 | loss=-0.2375 sim=0.238 d=0.05959 GRAD | make it stone
+
+  Epoch 2 | 13s | loss=-0.2198 sim=0.220 preserve=0.0017 prompt=-0.2199 delta=0.000358 d_max=0.04788 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_2.pt
+  E3 S3/15 | loss=-0.2265 sim=0.227 d=0.06440 GRAD | make it glowing
+  E3 S6/15 | loss=-0.2089 sim=0.209 d=0.06923 GRAD | paint it purple
+  E3 S9/15 | loss=-0.2136 sim=0.214 d=0.07262 GRAD | make it black
+  E3 S12/15 | loss=-0.2155 sim=0.216 d=0.07426 GRAD | make it blue
+  E3 S15/15 | loss=-0.2316 sim=0.232 d=0.07117 GRAD | make it black
+
+  Epoch 3 | 13s | loss=-0.2201 sim=0.220 preserve=0.0034 prompt=-0.2204 delta=0.001197 d_max=0.06841 | 15/15 ok, 15/15 grad
+  Saved: /workspace/edit_checkpoints/edit_net_epoch_3.pt
+
+============================================================
+  Training complete!
+============================================================
