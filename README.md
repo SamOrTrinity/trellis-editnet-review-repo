@@ -30,7 +30,7 @@ This is therefore a **latent editing** approach, not a fresh text-to-3D generati
 
 ---
 
-## 2. Executive summary
+## 2. Summary
 
 In this work, I adapted TRELLIS 1 into a system that edits a 3D representation from a source image and an edit prompt. The practical training strategy that ultimately worked was not to repeatedly re-encode source images during every training step, but to move to a **cached-latent training pipeline**. In that pipeline, source objects are encoded once, saved to disk, paired with edit prompts, and then used for efficient retraining of two small trainable modules: **EditNet** and **TextProjector**.
 
