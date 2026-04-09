@@ -14,7 +14,6 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
-from PIL import Image
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +28,6 @@ from trellis.modules.sparse import basic as sp
 # Config
 N_EPOCHS = int(os.getenv("EDIT_EPOCHS", "5"))
 LR = float(os.getenv("EDIT_LR", "3e-4"))
-SCALE = 0.1
 LAMBDA_PROMPT = float(os.getenv("EDIT_LAMBDA_PROMPT", "1.0"))
 LAMBDA_DELTA = float(os.getenv("EDIT_LAMBDA_DELTA", "0.05"))
 LAMBDA_PRESERVE = float(os.getenv("EDIT_LAMBDA_PRESERVE", "0.05"))
@@ -57,10 +55,10 @@ def main():
     output_dir = Path(CKPT_DIR)
     output_dir.mkdir(exist_ok=True)
 
-    # ---- Load pipeline and encode objects ----
+    # ---- Load pipeline and cached objects ----
     print("\n[1/4] Loading TRELLIS 1 and cached latents...", flush=True)
 
-    pipeline = TrellisImageTo3DPipeline.from_pretrained("/workspace/hf_models/TRELLIS-image-large")
+    pipeline = TrellisImageTo3DPipeline.from_pretrained("microsoft/TRELLIS-image-large")
     pipeline.cuda()
 
     for _, m in pipeline.models.items():
@@ -77,25 +75,34 @@ def main():
         payload = torch.load(cache_path, weights_only=False)
         nvox = payload["slat"].feats.shape[0]
         if nvox > MAX_VOXELS:
-            print("    SKIP {} too large ({} voxels > {})".format(
-                payload.get("image_name", cache_path.name), nvox, MAX_VOXELS), flush=True)
+            print(
+                "    SKIP {} too large ({} voxels > {})".format(
+                    payload.get("image_name", cache_path.name), nvox, MAX_VOXELS
+                ),
+                flush=True,
+            )
             continue
-        encoded.append({
-            "name": payload.get("image_name", cache_path.name),
-            "slat": payload["slat"],
-            "cond": payload["cond"],
-            "cache_path": str(cache_path),
-        })
-        print("    {} OK feats={} coords={}".format(
-            payload.get("image_name", cache_path.name),
-            tuple(payload["slat"].feats.shape),
-            tuple(payload["slat"].coords.shape)
-        ), flush=True)
+        encoded.append(
+            {
+                "name": payload.get("image_name", cache_path.name),
+                "slat": payload["slat"],
+                "cond": payload["cond"],
+                "cache_path": str(cache_path),
+            }
+        )
+        print(
+            "    {} OK feats={} coords={}".format(
+                payload.get("image_name", cache_path.name),
+                tuple(payload["slat"].feats.shape),
+                tuple(payload["slat"].coords.shape),
+            ),
+            flush=True,
+        )
 
     print("\n[2/4] Freeing DiT models (only need decoders)...", flush=True)
-    del pipeline.models['sparse_structure_flow_model']
-    del pipeline.models['slat_flow_model']
-    del pipeline.models['image_cond_model']
+    del pipeline.models["sparse_structure_flow_model"]
+    del pipeline.models["slat_flow_model"]
+    del pipeline.models["image_cond_model"]
     torch.cuda.empty_cache()
     gc.collect()
     print("  Freed ~20GB VRAM.", flush=True)
@@ -103,18 +110,18 @@ def main():
     # ---- Load CLIP ----
     print("\n[3/4] Loading CLIP...", flush=True)
     import open_clip
+
     clip_model, _, _ = open_clip.create_model_and_transforms("ViT-B-32", pretrained="openai")
     clip_tokenizer = open_clip.get_tokenizer("ViT-B-32")
     clip_model = clip_model.to(device).eval()
     for p in clip_model.parameters():
         p.requires_grad = False
-    clip_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073]).to(device)
-    clip_std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(device)
+    clip_mean = torch.tensor([0.48145466, 0.4578275, 0.40821073], device=device)
+    clip_std = torch.tensor([0.26862954, 0.26130258, 0.27577711], device=device)
     print("  Done.", flush=True)
 
     # ---- Create EditNet ----
-    edit_net = EditNet(latent_dim=8, cond_dim=1024, hidden_dim=256,
-                       n_blocks=3, scale=SCALE).to(device)
+    edit_net = EditNet(latent_dim=8, cond_dim=1024, hidden_dim=256, n_blocks=3, scale=SCALE).to(device)
     text_proj = TextProjector(768, 1024).to(device)
     trainable_params = list(edit_net.parameters()) + list(text_proj.parameters())
     optimizer = optim.AdamW(trainable_params, lr=LR, weight_decay=1e-5)
@@ -125,15 +132,30 @@ def main():
     yaws = [c[0] for c in cams]
     pitchs = [c[1] for c in cams]
     ext_list, intr_list = render_utils.yaw_pitch_r_fov_to_extrinsics_intrinsics(yaws, pitchs, 2, 40)
-    # Move to GPU - these are lists of tensors
     ext_list = [e.to(device) for e in ext_list]
     intr_list = [i.to(device) for i in intr_list]
 
     # ---- Training ----
     print("\n[4/4] Training...", flush=True)
-    n_steps = len(encoded) * PROMPTS_PER_OBJECT
-    print("  Loaded {} training pairs from /workspace/edit_training_data/training_pairs.json".format(
-        n_steps), flush=True)
+
+    import json
+
+    pairs_json = Path(PAIRS_JSON)
+    with open(pairs_json) as f:
+        pair_rows = json.load(f)
+
+    encoded_by_name = {}
+    for obj in encoded:
+        encoded_by_name[obj["name"]] = obj
+        encoded_by_name[Path(obj["cache_path"]).stem] = obj
+
+    pairs = []
+    for row in pair_rows:
+        key = row["uid"]
+        if key in encoded_by_name:
+            pairs.append((encoded_by_name[key], row["edit_prompt"]))
+
+    print("  Loaded {} training pairs from {}".format(len(pairs), PAIRS_JSON), flush=True)
     print("  Differentiable rendering: ON", flush=True)
     print("=" * 60, flush=True)
 
@@ -145,23 +167,6 @@ def main():
 
         torch.cuda.empty_cache()
         gc.collect()
-
-        import json
-        pairs_json = Path(PAIRS_JSON)
-        with open(pairs_json) as f:
-            pair_rows = json.load(f)
-
-        encoded_by_name = {}
-        for obj in encoded:
-            encoded_by_name[obj["name"]] = obj
-            encoded_by_name[Path(obj["cache_path"]).stem] = obj
-
-        pairs = []
-        for row in pair_rows:
-            key = row["uid"]
-            if key in encoded_by_name:
-                pairs.append((encoded_by_name[key], row["edit_prompt"]))
-
         random.shuffle(pairs)
 
         for step, (obj, prompt) in enumerate(pairs):
@@ -172,7 +177,7 @@ def main():
 
             try:
                 # Conditioning
-                e_img = obj["cond"]["cond"].detach()
+                e_img = obj["cond"]["cond"].detach().to(device)
                 if e_img.dim() == 2:
                     e_img = e_img.unsqueeze(0)
 
@@ -185,40 +190,49 @@ def main():
                 e_joint = torch.cat([e_img, e_text_tokens], dim=1)
 
                 # EditNet
-                feats_A = obj["slat"].feats.detach()
+                feats_A = obj["slat"].feats.detach().to(device)
                 feats_B, delta = edit_net(feats_A, e_joint)
 
                 # Build edited SparseTensor
                 slat_orig = obj["slat"]
                 slat_edited = sp.SparseTensor(
                     feats=feats_B,
-                    coords=slat_orig.coords,
-                    layout=slat_orig.layout if hasattr(slat_orig, 'layout') else None,
+                    coords=slat_orig.coords.to(device) if hasattr(slat_orig.coords, "to") else slat_orig.coords,
+                    layout=slat_orig.layout if hasattr(slat_orig, "layout") else None,
                 )
 
-                # Decode to Gaussian (grads flow through decoder)
-                outputs_B = pipeline.decode_slat(slat_edited, ['gaussian'])
-                gaussian_B = outputs_B['gaussian'][0]
+                # Decode edited latent
+                outputs_B = pipeline.decode_slat(slat_edited, ["gaussian"])
+                gaussian_B = outputs_B["gaussian"][0]
 
+                # Decode original latent on GPU for preserve reference
                 with torch.no_grad():
-                    outputs_A = pipeline.decode_slat(obj["slat"], ['gaussian'])
-                    gaussian_A = outputs_A['gaussian'][0]
+                    slat_A = sp.SparseTensor(
+                        feats=obj["slat"].feats.to(device),
+                        coords=obj["slat"].coords.to(device) if hasattr(obj["slat"].coords, "to") else obj["slat"].coords,
+                        layout=obj["slat"].layout if hasattr(obj["slat"], "layout") else None,
+                    )
+                    outputs_A = pipeline.decode_slat(slat_A, ["gaussian"])
+                    gaussian_A = outputs_A["gaussian"][0]
 
-                # Get renderer with correct near/far
+                # Renderer
                 renderer = render_utils.get_renderer(
-                    gaussian_B, resolution=RENDER_RES, bg_color=(0, 0, 0))                # DIFFERENTIABLE RENDER - edited views + provisional preserve reference
+                    gaussian_B, resolution=RENDER_RES, bg_color=(0, 0, 0)
+                )
+
+                # Differentiable render
                 color_views = []
                 l_preserve = torch.tensor(0.0, device=delta.device)
 
                 for vi in range(N_RENDER_VIEWS):
                     with torch.no_grad():
                         res_A = renderer.render(gaussian_A, ext_list[vi], intr_list[vi])
-                        color_A = res_A['color'].float().clamp(0, 1)
+                        color_A = res_A["color"].float().clamp(0, 1)
                         mask_A = (color_A.mean(dim=0, keepdim=True) > 1e-3).float()
 
                     res = renderer.render(gaussian_B, ext_list[vi], intr_list[vi])
-                    color_B = res['color'].float().clamp(0, 1)
-                    color_views.append(color_B)  # (3, H, W) with grad
+                    color_B = res["color"].float().clamp(0, 1)
+                    color_views.append(color_B)
 
                     l_preserve = l_preserve + (
                         ((color_B - color_A).abs() * mask_A).sum()
@@ -227,20 +241,20 @@ def main():
 
                 l_preserve = l_preserve / max(1, N_RENDER_VIEWS)
 
-                rendered = torch.stack(color_views)  # (N, 3, H, W)
-                rendered = rendered.float().clamp(0, 1)
+                rendered = torch.stack(color_views).float().clamp(0, 1)
 
-                # Resize for CLIP ViT-B/32
                 if rendered.shape[-1] != 224 or rendered.shape[-2] != 224:
                     rendered = F.interpolate(
-                        rendered, size=(224, 224),
-                        mode='bilinear', align_corners=False
+                        rendered,
+                        size=(224, 224),
+                        mode="bilinear",
+                        align_corners=False,
                     )
 
                 # CLIP normalize
                 clip_input = (rendered - clip_mean[None, :, None, None]) / clip_std[None, :, None, None]
 
-                # L_prompt
+                # Prompt loss
                 with torch.no_grad():
                     text_embed = clip_model.encode_text(text_tokens)
                     text_embed = text_embed / text_embed.norm(dim=-1, keepdim=True)
@@ -250,69 +264,136 @@ def main():
                 sim = (img_embeds * text_embed).sum(dim=-1)
                 l_prompt = -sim.mean()
 
-                # L_delta
+                # Delta loss
                 l_delta = delta_regularisation_loss(delta)
 
-                # Provisional preserve term: RGB consistency inside original silhouette
-                loss = (LAMBDA_PROMPT * l_prompt
-                        + LAMBDA_PRESERVE * l_preserve
-                        + LAMBDA_DELTA * l_delta)
+                # Total loss
+                loss = (
+                    LAMBDA_PROMPT * l_prompt
+                    + LAMBDA_PRESERVE * l_preserve
+                    + LAMBDA_DELTA * l_delta
+                )
 
                 # Backprop
                 loss.backward()
 
-                has_grad = any(p.grad is not None and p.grad.abs().sum() > 0
-                              for p in edit_net.parameters())
+                has_grad = any(
+                    p.grad is not None and p.grad.abs().sum() > 0
+                    for p in edit_net.parameters()
+                )
 
                 torch.nn.utils.clip_grad_norm_(trainable_params, 1.0)
                 optimizer.step()
 
                 loss_dict = {
-                    "total": loss.item(), "prompt": l_prompt.item(),
+                    "total": loss.item(),
+                    "prompt": l_prompt.item(),
                     "preserve": l_preserve.item(),
-                    "delta": l_delta.item(), "d_max": delta.abs().max().item(),
-                    "sim": sim.mean().item(), "grad": has_grad,
+                    "delta": l_delta.item(),
+                    "d_max": delta.abs().max().item(),
+                    "sim": sim.mean().item(),
+                    "grad": has_grad,
                 }
                 epoch_losses.append(loss_dict)
 
                 if (step + 1) % 3 == 0:
                     g = "GRAD" if has_grad else "NO_GRAD"
-                    print("  E{} S{}/{} | loss={:.4f} sim={:.3f} d={:.5f} {} | {}".format(
-                        epoch+1, step+1, len(pairs), loss_dict["total"],
-                        loss_dict["sim"], loss_dict["d_max"], g, prompt), flush=True)
+                    print(
+                        "  E{} S{}/{} | loss={:.4f} sim={:.3f} d={:.5f} {} | {}".format(
+                            epoch + 1,
+                            step + 1,
+                            len(pairs),
+                            loss_dict["total"],
+                            loss_dict["sim"],
+                            loss_dict["d_max"],
+                            g,
+                            prompt,
+                        ),
+                        flush=True,
+                    )
 
             except Exception as e:
-                import traceback; print("  S{} FAIL: {}: {}".format(step+1, type(e).__name__, e), flush=True); traceback.print_exc()
+                import traceback
+
+                print(
+                    "  S{} FAIL: {}: {}".format(step + 1, type(e).__name__, e),
+                    flush=True,
+                )
+                traceback.print_exc()
                 torch.cuda.empty_cache()
                 gc.collect()
                 optimizer.zero_grad(set_to_none=True)
 
             # Cleanup
-            for v in ['slat_edited', 'outputs_A', 'outputs_B', 'gaussian_A', 'gaussian_B', 'renderer',
-                      'color_views', 'rendered', 'clip_input', 'img_embeds',
-                      'loss', 'l_prompt', 'l_preserve', 'l_delta', 'feats_B', 'delta',
-                      'res', 'res_A', 'color_A', 'color_B', 'mask_A']:
-                try: exec('del {}'.format(v))
-                except: pass
+            for v in [
+                "slat_edited",
+                "slat_A",
+                "outputs_A",
+                "outputs_B",
+                "gaussian_A",
+                "gaussian_B",
+                "renderer",
+                "color_views",
+                "rendered",
+                "clip_input",
+                "img_embeds",
+                "loss",
+                "l_prompt",
+                "l_preserve",
+                "l_delta",
+                "feats_B",
+                "delta",
+                "res",
+                "res_A",
+                "color_A",
+                "color_B",
+                "mask_A",
+            ]:
+                try:
+                    exec("del {}".format(v))
+                except Exception:
+                    pass
             torch.cuda.empty_cache()
 
         # Epoch summary
         t = time.time() - epoch_start
         if epoch_losses:
-            avg = {k: np.mean([l[k] for l in epoch_losses if isinstance(l[k], (int, float))])
-                   for k in ['total', 'sim', 'd_max', 'preserve', 'delta', 'prompt']}
-            gc_count = sum(1 for l in epoch_losses if l['grad'])
-            print("\n  Epoch {} | {:.0f}s | loss={:.4f} sim={:.3f} preserve={:.4f} prompt={:.4f} delta={:.6f} d_max={:.5f} | {}/{} ok, {}/{} grad".format(
-                epoch+1, t, avg['total'], avg['sim'], avg['preserve'], avg['prompt'], avg['delta'], avg['d_max'],
-                len(epoch_losses), len(pairs), gc_count, len(epoch_losses)), flush=True)
+            avg = {
+                k: np.mean([l[k] for l in epoch_losses if isinstance(l[k], (int, float))])
+                for k in ["total", "sim", "d_max", "preserve", "delta", "prompt"]
+            }
+            gc_count = sum(1 for l in epoch_losses if l["grad"])
+            print(
+                "\n  Epoch {} | {:.0f}s | loss={:.4f} sim={:.3f} preserve={:.4f} prompt={:.4f} delta={:.6f} d_max={:.5f} | {}/{} ok, {}/{} grad".format(
+                    epoch + 1,
+                    t,
+                    avg["total"],
+                    avg["sim"],
+                    avg["preserve"],
+                    avg["prompt"],
+                    avg["delta"],
+                    avg["d_max"],
+                    len(epoch_losses),
+                    len(pairs),
+                    gc_count,
+                    len(epoch_losses),
+                ),
+                flush=True,
+            )
         else:
-            print("\n  Epoch {} | {:.0f}s | NO successful steps".format(epoch+1, t), flush=True)
+            print("\n  Epoch {} | {:.0f}s | NO successful steps".format(epoch + 1, t), flush=True)
 
-        if (epoch+1) % SAVE_EVERY == 0 and epoch_losses:
-            p = output_dir / "edit_net_epoch_{}.pt".format(epoch+1)
-            torch.save({"epoch": epoch+1, "edit_net": edit_net.state_dict(),
-                        "text_proj": text_proj.state_dict(),
-                        "optimizer": optimizer.state_dict()}, p)
+        if (epoch + 1) % SAVE_EVERY == 0 and epoch_losses:
+            p = output_dir / "edit_net_epoch_{}.pt".format(epoch + 1)
+            torch.save(
+                {
+                    "epoch": epoch + 1,
+                    "edit_net": edit_net.state_dict(),
+                    "text_proj": text_proj.state_dict(),
+                    "optimizer": optimizer.state_dict(),
+                },
+                p,
+            )
             print("  Saved: {}".format(p), flush=True)
 
         torch.cuda.empty_cache()
@@ -321,6 +402,7 @@ def main():
     print("\n" + "=" * 60, flush=True)
     print("  Training complete!", flush=True)
     print("=" * 60, flush=True)
+
 
 if __name__ == "__main__":
     main()
