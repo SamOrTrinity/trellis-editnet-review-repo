@@ -217,7 +217,7 @@ This notebook is the recommended user workflow because it:
 
 So the practical answer is:
 
-- **use `TRELLIS_Colab_Fresh_Stable_EditNet_Cleaned.ipynb` for normal retraining**
+- **use `TRELLIS_Colab.ipynb` for normal retraining**
 - **use `train_edit_delta_scalable.py` if you want to inspect or modify the backend trainer directly**
 - **use `train_edit_delta_cached.py` only as an earlier baseline/reference**
 - **use `eval_rerun_checkpoint.py` for checkpoint-based rerendering and inference after training**
