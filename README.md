@@ -134,7 +134,7 @@ trellis-editnet-review-repo/
 ### What each top-level part does
 
 - `README.md` — project overview, training workflow, file map, and inference notes
-- `TRELLIS_Colab_Fresh_Stable_EditNet_Cleaned.ipynb` — the main user-facing notebook for cached-latent generation, pair creation, training, log inspection, and inference after training
+- `TRELLIS_Colab.ipynb` — the main user-facing notebook for cached-latent generation, pair creation, training, log inspection, and inference after training
 - `docs/` — written project documentation, results write-ups, and supporting figures
 - `artifacts/` — saved logs, checkpoints, evaluation folders, and workspace metadata from runs
 - `scripts/generate_report_assets.py` — helper used to turn logs/results into plots and report assets
