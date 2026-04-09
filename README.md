@@ -339,43 +339,8 @@ These are the files used later for inference and evaluation.
 
 ## 9. Inference after training
 
-After training finishes, the normal inference path is:
+After training finishes, run the inference cell:
 
-1. choose a saved checkpoint from `/workspace/edit_checkpoints/`
-2. choose a cached latent from `/workspace/edit_training_data/encoded_latents/`
-3. run the evaluation / rerender step
-
-There are two practical ways to do this.
-
-### Option A — use the notebook inference cell
-
-The notebook includes a post-training evaluation section where I:
-
-- load a checkpoint
-- load a cached latent payload
-- rebuild `EditNet` and `TextProjector`
-- apply the edit to the cached latent
-- decode it through the TRELLIS Gaussian decoder
-- rerender the result for inspection
-
-This is the recommended user path, because it keeps inference in the same Colab workflow as training.
-
-### Option B — run `eval_rerun_checkpoint.py`
-
-A user can also run the standalone evaluation script directly.
-
-The practical logic is:
-
-```python
-ckpt = torch.load(CKPT_PATH, map_location="cpu", weights_only=False)
-edit_net = EditNet(latent_dim=8, cond_dim=1024, hidden_dim=256, n_blocks=3, scale=0.1).to(DEVICE)
-text_proj = TextProjector(768, 1024).to(DEVICE)
-edit_net.load_state_dict(ckpt["edit_net"])
-text_proj.load_state_dict(ckpt["text_proj"])
-payload = torch.load(CACHE_PATH, weights_only=False)
-```
-
-The user then rerenders the edited output from that checkpoint/cached-latent combination.
 
 ### Minimal inference workflow
 
