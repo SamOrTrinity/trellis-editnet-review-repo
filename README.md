@@ -203,7 +203,7 @@ The field `uid` must match either:
 For most users, the main entry point is now the notebook:
 
 ```text
-TRELLIS_Colab_Fresh_Stable_EditNet_Cleaned.ipynb
+TRELLIS_Colab.ipynb
 ```
 
 This notebook is the recommended user workflow because it:
@@ -423,7 +423,7 @@ So, for a new user, the repository should now be approached as:
 
 ## 12. What the main training files do
 
-### `TRELLIS_Colab_Fresh_Stable_EditNet_Cleaned.ipynb`
+### `TRELLIS_Colab.ipynb`
 This is the main practical notebook for:
 
 - preparing the Colab/TRELLIS runtime
